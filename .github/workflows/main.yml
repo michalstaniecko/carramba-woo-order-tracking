@@ -11,5 +11,5 @@ jobs:
       - name: Archive production artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-without-markdown
-          path: assets/
+          name: carramba-woo-order-tracking
+          path: assets
