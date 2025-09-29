@@ -13,4 +13,4 @@ jobs:
         with:
           name: carramba-woo-order-tracking
           path: |
-            assets
+            ./assets
