@@ -1,0 +1,82 @@
+/* Admin styles for CWOT plugin */
+
+.cwot-status-active {
+    color: #46b450;
+    font-weight: bold;
+}
+
+.cwot-status-inactive {
+    color: #dc3232;
+    font-weight: bold;
+}
+
+.cwot-tracking-info {
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.cwot-tracking-info strong {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.cwot-tracking-info a {
+    text-decoration: none;
+    color: #2271b1;
+}
+
+.cwot-tracking-info a:hover {
+    text-decoration: underline;
+}
+
+.cwot-tracking-error {
+    color: #dc3232;
+    font-style: italic;
+}
+
+.cwot-no-tracking {
+    color: #8c8f94;
+    font-style: italic;
+}
+
+/* Form styles */
+.form-table th {
+    width: 200px;
+    vertical-align: top;
+    padding-top: 20px;
+}
+
+.form-table td {
+    padding-top: 15px;
+}
+
+.form-table input[type="text"],
+.form-table input[type="url"],
+.form-table select {
+    box-sizing: border-box;
+}
+
+.form-table .description {
+    margin-top: 5px;
+    color: #646970;
+    font-style: italic;
+}
+
+/* Admin table improvements */
+.wp-list-table th,
+.wp-list-table td {
+    vertical-align: middle;
+}
+
+.wp-list-table code {
+    background: #f0f0f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    word-break: break-all;
+    max-width: 300px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
