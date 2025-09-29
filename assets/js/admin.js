@@ -3,7 +3,7 @@
 jQuery(document).ready(function($) {
     // Confirm delete action
     $('.button-link-delete').on('click', function(e) {
-        if (!confirm(cwot_admin.confirm_delete)) {
+        if (!confirm('Are you sure you want to delete this shipper?')) {
             e.preventDefault();
             return false;
         }

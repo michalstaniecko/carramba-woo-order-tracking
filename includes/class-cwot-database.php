@@ -38,8 +38,8 @@ class CWOT_Database {
             name varchar(255) NOT NULL,
             tracking_url text NOT NULL,
             status enum('active','inactive') DEFAULT 'active',
-            created_at datetime DEFAULT CURRENT_TIMESTAMP,
-            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            created_at datetime DEFAULT '0000-00-00 00:00:00',
+            updated_at datetime DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (id)
         ) $charset_collate;";
         
@@ -60,6 +60,7 @@ class CWOT_Database {
         global $wpdb;
         
         $table_name = $wpdb->prefix . 'cwot_shippers';
+        $current_time = current_time('mysql');
         
         $default_shippers = array(
             array(
@@ -86,9 +87,11 @@ class CWOT_Database {
                 array(
                     'name' => $shipper['name'],
                     'tracking_url' => $shipper['tracking_url'],
-                    'status' => 'active'
+                    'status' => 'active',
+                    'created_at' => $current_time,
+                    'updated_at' => $current_time
                 ),
-                array('%s', '%s', '%s')
+                array('%s', '%s', '%s', '%s', '%s')
             );
         }
     }
@@ -139,6 +142,7 @@ class CWOT_Database {
         global $wpdb;
         
         $table_name = $wpdb->prefix . 'cwot_shippers';
+        $current_time = current_time('mysql');
         
         $shipper_data = array(
             'name' => sanitize_text_field($data['name']),
@@ -148,19 +152,22 @@ class CWOT_Database {
         
         if ($id) {
             // Update existing shipper
+            $shipper_data['updated_at'] = $current_time;
             return $wpdb->update(
                 $table_name,
                 $shipper_data,
                 array('id' => $id),
-                array('%s', '%s', '%s'),
+                array('%s', '%s', '%s', '%s'),
                 array('%d')
             );
         } else {
             // Insert new shipper
+            $shipper_data['created_at'] = $current_time;
+            $shipper_data['updated_at'] = $current_time;
             return $wpdb->insert(
                 $table_name,
                 $shipper_data,
-                array('%s', '%s', '%s')
+                array('%s', '%s', '%s', '%s', '%s')
             );
         }
     }
