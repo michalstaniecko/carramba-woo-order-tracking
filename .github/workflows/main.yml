@@ -12,4 +12,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: carramba-woo-order-tracking
-          path: assets
+          path: |
+            assets
