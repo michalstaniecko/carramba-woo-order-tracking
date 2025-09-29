@@ -10,9 +10,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist-without-markdown
-          path: |
-            assets
-            includes
-            README.md
-            uninstall.php
-            !.gitignore
+          path: assets/**/*
