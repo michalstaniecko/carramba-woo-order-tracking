@@ -20,8 +20,8 @@ class CWOT_Order_Tracking {
     }
     
     private function __construct() {
-        // Add tracking fields to order edit page
-        add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'add_tracking_fields_to_order'));
+        // Add tracking fields to order edit page - moved to sidebar
+        add_action('woocommerce_admin_order_data_after_order_details', array($this, 'add_tracking_fields_to_order'));
         
         // Save tracking data when order is saved
         add_action('woocommerce_process_shop_order_meta', array($this, 'save_tracking_data'));
@@ -124,10 +124,10 @@ class CWOT_Order_Tracking {
         $tracking_number = $this->get_order_meta($order_id, '_cwot_tracking_number', true);
         $shippers = CWOT_Database::get_active_shippers();
         ?>
-        <div class="order_data_column">
+        <div class="order_data_column" style="width: 100%;">
             <h3><?php _e('Order Tracking', 'carramba-woo-order-tracking'); ?></h3>
             
-            <p class="form-field form-field-wide">
+            <p class="form-field">
                 <label for="_cwot_tracking_shipper_id"><?php _e('Shipper:', 'carramba-woo-order-tracking'); ?></label>
                 <select id="_cwot_tracking_shipper_id" name="_cwot_tracking_shipper_id" class="wc-enhanced-select" style="width: 100%;">
                     <option value=""><?php _e('Select a shipper...', 'carramba-woo-order-tracking'); ?></option>
@@ -139,7 +139,7 @@ class CWOT_Order_Tracking {
                 </select>
             </p>
             
-            <p class="form-field form-field-wide">
+            <p class="form-field">
                 <label for="_cwot_tracking_number"><?php _e('Tracking Number:', 'carramba-woo-order-tracking'); ?></label>
                 <input type="text" id="_cwot_tracking_number" name="_cwot_tracking_number" value="<?php echo esc_attr($tracking_number); ?>" placeholder="<?php _e('Enter tracking number', 'carramba-woo-order-tracking'); ?>" />
             </p>
@@ -150,7 +150,7 @@ class CWOT_Order_Tracking {
                 if ($shipper):
                     $tracking_url = str_replace('{tracking_number}', urlencode($tracking_number), $shipper->tracking_url);
                 ?>
-                    <p class="form-field form-field-wide">
+                    <p class="form-field">
                         <label><?php _e('Tracking Link:', 'carramba-woo-order-tracking'); ?></label>
                         <a href="<?php echo esc_url($tracking_url); ?>" target="_blank" class="button button-secondary">
                             <?php _e('Track Package', 'carramba-woo-order-tracking'); ?>
