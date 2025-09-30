@@ -102,9 +102,6 @@ class Carramba_WooCommerce_Order_Tracking {
      * Initialize hooks
      */
     public function init_hooks() {
-        register_activation_hook(__FILE__, array($this, 'activate'));
-        register_deactivation_hook(__FILE__, array($this, 'deactivate'));
-        
         // Initialize components
         CWOT_Database::get_instance();
         CWOT_Admin::get_instance();
@@ -128,12 +125,33 @@ class Carramba_WooCommerce_Order_Tracking {
     }
     
     /**
+     * Static plugin activation callback
+     */
+    public static function plugin_activate() {
+        // Ensure database class is loaded
+        require_once CWOT_PLUGIN_PATH . 'includes/class-cwot-database.php';
+        CWOT_Database::create_tables();
+        flush_rewrite_rules();
+    }
+    
+    /**
+     * Static plugin deactivation callback
+     */
+    public static function plugin_deactivate() {
+        flush_rewrite_rules();
+    }
+    
+    /**
      * WooCommerce missing notice
      */
     public function woocommerce_missing_notice() {
         echo '<div class="error"><p><strong>' . __('Carramba WooCommerce Order Tracking', 'carramba-woo-order-tracking') . '</strong> ' . __('requires WooCommerce to be installed and active.', 'carramba-woo-order-tracking') . '</p></div>';
     }
 }
+
+// Register activation and deactivation hooks
+register_activation_hook(__FILE__, array('Carramba_WooCommerce_Order_Tracking', 'plugin_activate'));
+register_deactivation_hook(__FILE__, array('Carramba_WooCommerce_Order_Tracking', 'plugin_deactivate'));
 
 // Initialize the plugin
 Carramba_WooCommerce_Order_Tracking::get_instance();
