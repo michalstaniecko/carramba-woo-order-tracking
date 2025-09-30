@@ -20,8 +20,8 @@ class CWOT_Order_Tracking {
     }
     
     private function __construct() {
-        // Add tracking fields to order edit page - moved to sidebar
-        add_action('woocommerce_admin_order_data_after_order_details', array($this, 'add_tracking_fields_to_order'));
+        // Add tracking meta box to order edit page - HPOS compatible
+        add_action('add_meta_boxes', array($this, 'add_tracking_meta_box'));
         
         // Save tracking data when order is saved
         add_action('woocommerce_process_shop_order_meta', array($this, 'save_tracking_data'));
@@ -92,6 +92,73 @@ class CWOT_Order_Tracking {
     }
     
     /**
+     * Add tracking meta box to order edit page
+     */
+    public function add_tracking_meta_box() {
+        $screen = $this->is_hpos_enabled() ? wc_get_page_screen_id('shop-order') : 'shop_order';
+        
+        add_meta_box(
+            'cwot_order_tracking',
+            __('Order Tracking', 'carramba-woo-order-tracking'),
+            array($this, 'render_tracking_meta_box'),
+            $screen,
+            'side',
+            'default'
+        );
+    }
+    
+    /**
+     * Render tracking meta box content
+     */
+    public function render_tracking_meta_box($post_or_order) {
+        // Get order ID - HPOS compatible
+        if ($this->is_hpos_enabled()) {
+            $order_id = $post_or_order->get_id();
+        } else {
+            $order_id = $post_or_order->ID;
+        }
+        
+        $tracking_shipper_id = $this->get_order_meta($order_id, '_cwot_tracking_shipper_id', true);
+        $tracking_number = $this->get_order_meta($order_id, '_cwot_tracking_number', true);
+        $shippers = CWOT_Database::get_active_shippers();
+        ?>
+        <div class="cwot-tracking-meta-box">
+            <p class="form-field">
+                <label for="_cwot_tracking_shipper_id"><?php _e('Shipper:', 'carramba-woo-order-tracking'); ?></label>
+                <select id="_cwot_tracking_shipper_id" name="_cwot_tracking_shipper_id" class="wc-enhanced-select" style="width: 100%;">
+                    <option value=""><?php _e('Select a shipper...', 'carramba-woo-order-tracking'); ?></option>
+                    <?php foreach ($shippers as $shipper): ?>
+                        <option value="<?php echo esc_attr($shipper->id); ?>" <?php selected($tracking_shipper_id, $shipper->id); ?>>
+                            <?php echo esc_html($shipper->name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </p>
+            
+            <p class="form-field">
+                <label for="_cwot_tracking_number"><?php _e('Tracking Number:', 'carramba-woo-order-tracking'); ?></label>
+                <input type="text" id="_cwot_tracking_number" name="_cwot_tracking_number" value="<?php echo esc_attr($tracking_number); ?>" placeholder="<?php _e('Enter tracking number', 'carramba-woo-order-tracking'); ?>" style="width: 100%;" />
+            </p>
+            
+            <?php if ($tracking_shipper_id && $tracking_number): ?>
+                <?php 
+                $shipper = CWOT_Database::get_shipper_by_id($tracking_shipper_id);
+                if ($shipper):
+                    $tracking_url = str_replace('{tracking_number}', urlencode($tracking_number), $shipper->tracking_url);
+                ?>
+                    <p class="form-field">
+                        <label><?php _e('Tracking Link:', 'carramba-woo-order-tracking'); ?></label>
+                        <a href="<?php echo esc_url($tracking_url); ?>" target="_blank" class="button button-secondary" style="width: 100%; text-align: center;">
+                            <?php _e('Track Package', 'carramba-woo-order-tracking'); ?>
+                        </a>
+                    </p>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
+        <?php
+    }
+    
+    /**
      * Enqueue scripts for order edit page
      */
     public function enqueue_order_scripts($hook) {
@@ -113,53 +180,6 @@ class CWOT_Order_Tracking {
             wp_enqueue_style('cwot-order-style', CWOT_PLUGIN_URL . 'assets/css/order.css', array(), CWOT_VERSION);
             wp_enqueue_script('cwot-order-script', CWOT_PLUGIN_URL . 'assets/js/order.js', array('jquery'), CWOT_VERSION, true);
         }
-    }
-    
-    /**
-     * Add tracking fields to order edit page
-     */
-    public function add_tracking_fields_to_order($order) {
-        $order_id = $order->get_id();
-        $tracking_shipper_id = $this->get_order_meta($order_id, '_cwot_tracking_shipper_id', true);
-        $tracking_number = $this->get_order_meta($order_id, '_cwot_tracking_number', true);
-        $shippers = CWOT_Database::get_active_shippers();
-        ?>
-        <div class="order_data_column" style="width: 100%;">
-            <h3><?php _e('Order Tracking', 'carramba-woo-order-tracking'); ?></h3>
-            
-            <p class="form-field">
-                <label for="_cwot_tracking_shipper_id"><?php _e('Shipper:', 'carramba-woo-order-tracking'); ?></label>
-                <select id="_cwot_tracking_shipper_id" name="_cwot_tracking_shipper_id" class="wc-enhanced-select" style="width: 100%;">
-                    <option value=""><?php _e('Select a shipper...', 'carramba-woo-order-tracking'); ?></option>
-                    <?php foreach ($shippers as $shipper): ?>
-                        <option value="<?php echo esc_attr($shipper->id); ?>" <?php selected($tracking_shipper_id, $shipper->id); ?>>
-                            <?php echo esc_html($shipper->name); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </p>
-            
-            <p class="form-field">
-                <label for="_cwot_tracking_number"><?php _e('Tracking Number:', 'carramba-woo-order-tracking'); ?></label>
-                <input type="text" id="_cwot_tracking_number" name="_cwot_tracking_number" value="<?php echo esc_attr($tracking_number); ?>" placeholder="<?php _e('Enter tracking number', 'carramba-woo-order-tracking'); ?>" />
-            </p>
-            
-            <?php if ($tracking_shipper_id && $tracking_number): ?>
-                <?php 
-                $shipper = CWOT_Database::get_shipper_by_id($tracking_shipper_id);
-                if ($shipper):
-                    $tracking_url = str_replace('{tracking_number}', urlencode($tracking_number), $shipper->tracking_url);
-                ?>
-                    <p class="form-field">
-                        <label><?php _e('Tracking Link:', 'carramba-woo-order-tracking'); ?></label>
-                        <a href="<?php echo esc_url($tracking_url); ?>" target="_blank" class="button button-secondary">
-                            <?php _e('Track Package', 'carramba-woo-order-tracking'); ?>
-                        </a>
-                    </p>
-                <?php endif; ?>
-            <?php endif; ?>
-        </div>
-        <?php
     }
     
     /**
