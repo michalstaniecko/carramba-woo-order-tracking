@@ -1,23 +1,18 @@
 /* Order edit page styles for CWOT plugin */
 
-.order_data_column h3 {
-    margin-top: 20px;
-}
-
-/* Sidebar-specific styles for order tracking */
-.order_data_column .form-field {
-    clear: both;
+/* Meta box styles for order tracking */
+.cwot-tracking-meta-box .form-field {
     margin-bottom: 15px;
 }
 
-.order_data_column .form-field label {
+.cwot-tracking-meta-box .form-field label {
     font-weight: bold;
     display: block;
     margin-bottom: 5px;
 }
 
-.order_data_column .form-field select,
-.order_data_column .form-field input[type="text"] {
+.cwot-tracking-meta-box .form-field select,
+.cwot-tracking-meta-box .form-field input[type="text"] {
     width: 100%;
     max-width: 100%;
 }
