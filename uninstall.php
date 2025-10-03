@@ -26,3 +26,5 @@ if (class_exists('Automattic\WooCommerce\Utilities\OrderUtil') &&
 
 // Clean up any plugin options (if we had any)
 // delete_option('cwot_plugin_options');
+delete_option('cwot_show_tracking_on_order_details');
+delete_option('cwot_show_tracking_in_emails');
