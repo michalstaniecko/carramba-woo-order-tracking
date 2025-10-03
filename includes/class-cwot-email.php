@@ -25,6 +25,19 @@ class CWOT_Email {
         
         // Add tracking info to order details on my account page
         add_action('woocommerce_order_details_after_order_table', array($this, 'add_tracking_info_to_order_details'));
+        
+        // Enqueue frontend styles for order tracking display
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_styles'));
+    }
+    
+    /**
+     * Enqueue frontend styles for order tracking display
+     */
+    public function enqueue_frontend_styles() {
+        // Only enqueue on order view pages
+        if (is_wc_endpoint_url('view-order') || is_wc_endpoint_url('order-received')) {
+            wp_enqueue_style('cwot-order-style', CWOT_PLUGIN_URL . 'assets/css/order.css', array(), CWOT_VERSION);
+        }
     }
     
     /**
@@ -54,14 +67,10 @@ class CWOT_Email {
      * Add tracking information to order details on my account page
      */
     public function add_tracking_info_to_order_details($order) {
-        // Only show for completed orders
-        if ($order->get_status() !== 'completed') {
-            return;
-        }
-        
         $order_id = $order->get_id();
         $tracking_info = CWOT_Order_Tracking::get_order_tracking_info($order_id);
         
+        // Only show if tracking information is available
         if (!$tracking_info) {
             return;
         }
