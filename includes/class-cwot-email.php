@@ -54,14 +54,10 @@ class CWOT_Email {
      * Add tracking information to order details on my account page
      */
     public function add_tracking_info_to_order_details($order) {
-        // Only show for completed orders
-        if ($order->get_status() !== 'completed') {
-            return;
-        }
-        
         $order_id = $order->get_id();
         $tracking_info = CWOT_Order_Tracking::get_order_tracking_info($order_id);
         
+        // Only show if tracking information is available
         if (!$tracking_info) {
             return;
         }
