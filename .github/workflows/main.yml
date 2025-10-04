@@ -15,4 +15,5 @@ jobs:
           path: |
             assets/
             includes/
+            templates/
             ./*.php
