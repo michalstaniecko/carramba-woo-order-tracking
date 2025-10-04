@@ -13,19 +13,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create plugin archive
-        run: |
-          # Create the ZIP archive directly from the plugin files
-          zip -r carramba-woo-order-tracking.zip \
-            assets/ \
-            includes/ \
-            templates/ \
-            *.php \
-            README.md \
-            -x "*.git*"
-
       - name: Upload plugin archive
         uses: actions/upload-artifact@v4
         with:
           name: carramba-woo-order-tracking
-          path: carramba-woo-order-tracking.zip
+          path: |
+            assets/
+            includes/
+            templates/
+            *.php
+            README.md
