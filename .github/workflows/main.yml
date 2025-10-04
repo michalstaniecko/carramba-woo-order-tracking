@@ -1,6 +1,10 @@
-name: Artifacts
+name: Build WordPress Plugin Archive
 
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   build_and_test:
@@ -8,12 +12,29 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Archive production artifacts
+
+      - name: Create plugin archive
+        run: |
+          # Create a temporary directory for the plugin
+          mkdir -p /tmp/plugin-build
+          mkdir -p /tmp/plugin-build/carramba-woo-order-tracking
+
+          # Copy plugin files to the temporary directory
+          cp -r assets /tmp/plugin-build/carramba-woo-order-tracking/
+          cp -r includes /tmp/plugin-build/carramba-woo-order-tracking/
+          cp -r templates /tmp/plugin-build/carramba-woo-order-tracking/
+          cp *.php /tmp/plugin-build/carramba-woo-order-tracking/
+          cp README.md /tmp/plugin-build/carramba-woo-order-tracking/
+
+          # Create the ZIP archive
+          cd /tmp/plugin-build
+          zip -r carramba-woo-order-tracking.zip carramba-woo-order-tracking/
+
+          # Move the archive to the workspace
+          mv carramba-woo-order-tracking.zip $GITHUB_WORKSPACE/
+
+      - name: Upload plugin archive
         uses: actions/upload-artifact@v4
         with:
           name: carramba-woo-order-tracking
-          path: |
-            assets/
-            includes/
-            templates/
-            ./*.php
+          path: carramba-woo-order-tracking.zip
