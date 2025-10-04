@@ -26,3 +26,6 @@ if (class_exists('Automattic\WooCommerce\Utilities\OrderUtil') &&
 
 // Clean up any plugin options (if we had any)
 // delete_option('cwot_plugin_options');
+// Clean up plugin settings
+delete_option('cwot_show_in_order_details');
+delete_option('cwot_show_in_email');

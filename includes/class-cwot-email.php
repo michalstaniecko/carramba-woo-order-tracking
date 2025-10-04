@@ -44,6 +44,12 @@ class CWOT_Email {
      * Add tracking information to customer emails
      */
     public function add_tracking_info_to_email($order, $sent_to_admin, $plain_text, $email) {
+        // Check if tracking info in email is enabled
+        $show_in_email = get_option('cwot_show_in_email', 1);
+        if (!$show_in_email) {
+            return;
+        }
+        
         // Only add tracking info to customer completed order email
         if ($email->id !== 'customer_completed_order' || $sent_to_admin) {
             return;
@@ -67,6 +73,12 @@ class CWOT_Email {
      * Add tracking information to order details on my account page
      */
     public function add_tracking_info_to_order_details($order) {
+        // Check if tracking info in order details is enabled
+        $show_in_order_details = get_option('cwot_show_in_order_details', 1);
+        if (!$show_in_order_details) {
+            return;
+        }
+        
         $order_id = $order->get_id();
         $tracking_info = CWOT_Order_Tracking::get_order_tracking_info($order_id);
         
