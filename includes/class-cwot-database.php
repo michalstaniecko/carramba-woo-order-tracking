@@ -146,7 +146,7 @@ class CWOT_Database {
         
         $shipper_data = array(
             'name' => sanitize_text_field($data['name']),
-            'tracking_url' => esc_url_raw($data['tracking_url']),
+            'tracking_url' => sanitize_text_field($data['tracking_url']),
             'status' => sanitize_text_field($data['status'])
         );
         
