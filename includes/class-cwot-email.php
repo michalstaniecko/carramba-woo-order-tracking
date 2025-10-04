@@ -96,20 +96,24 @@ class CWOT_Email {
                         <th><?php _e('Shipping Company:', 'carramba-woo-order-tracking'); ?></th>
                         <td><?php echo esc_html($tracking_info['shipper_name']); ?></td>
                     </tr>
+                    <?php foreach ($tracking_info['tracking_items'] as $item): ?>
                     <tr>
                         <th><?php _e('Tracking Number:', 'carramba-woo-order-tracking'); ?></th>
                         <td>
-                            <a href="<?php echo esc_url($tracking_info['tracking_url']); ?>" target="_blank" class="woocommerce-order-tracking-link">
-                                <?php echo esc_html($tracking_info['tracking_number']); ?>
+                            <a href="<?php echo esc_url($item['tracking_url']); ?>" target="_blank" class="woocommerce-order-tracking-link">
+                                <?php echo esc_html($item['tracking_number']); ?>
                             </a>
                         </td>
                     </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
             <p>
-                <a href="<?php echo esc_url($tracking_info['tracking_url']); ?>" target="_blank" class="button wc-forward">
-                    <?php _e('Track Your Package', 'carramba-woo-order-tracking'); ?>
+                <?php foreach ($tracking_info['tracking_items'] as $item): ?>
+                <a href="<?php echo esc_url($item['tracking_url']); ?>" target="_blank" class="button wc-forward" style="margin-right: 5px; margin-bottom: 5px;">
+                    <?php echo sprintf(__('Track %s', 'carramba-woo-order-tracking'), esc_html($item['tracking_number'])); ?>
                 </a>
+                <?php endforeach; ?>
             </p>
         </section>
         <?php
@@ -135,23 +139,27 @@ class CWOT_Email {
                             <?php echo esc_html($tracking_info['shipper_name']); ?>
                         </td>
                     </tr>
+                    <?php foreach ($tracking_info['tracking_items'] as $item): ?>
                     <tr>
                         <th style="color: #636363; border: 1px solid #e5e5e5; vertical-align: middle; padding: 12px; text-align: left; background-color: #f8f8f8;" scope="row">
                             <?php _e('Tracking Number:', 'carramba-woo-order-tracking'); ?>
                         </th>
                         <td style="color: #636363; border: 1px solid #e5e5e5; vertical-align: middle; padding: 12px; text-align: left;">
-                            <a href="<?php echo esc_url($tracking_info['tracking_url']); ?>" style="color: #96588a; font-weight: normal; text-decoration: underline;" target="_blank">
-                                <?php echo esc_html($tracking_info['tracking_number']); ?>
+                            <a href="<?php echo esc_url($item['tracking_url']); ?>" style="color: #96588a; font-weight: normal; text-decoration: underline;" target="_blank">
+                                <?php echo esc_html($item['tracking_number']); ?>
                             </a>
                         </td>
                     </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
             
             <p style="margin: 0 0 16px;">
-                <a href="<?php echo esc_url($tracking_info['tracking_url']); ?>" style="background-color: #96588a; border-radius: 3px; color: #ffffff; display: inline-block; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; font-size: 14px; font-weight: bold; line-height: 1; margin: 16px 0 0; padding: 12px 24px; text-decoration: none; text-transform: uppercase; vertical-align: middle;" target="_blank">
-                    <?php _e('Track Your Package', 'carramba-woo-order-tracking'); ?>
+                <?php foreach ($tracking_info['tracking_items'] as $item): ?>
+                <a href="<?php echo esc_url($item['tracking_url']); ?>" style="background-color: #96588a; border-radius: 3px; color: #ffffff; display: inline-block; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; font-size: 14px; font-weight: bold; line-height: 1; margin: 16px 5px 0 0; padding: 12px 24px; text-decoration: none; text-transform: uppercase; vertical-align: middle;" target="_blank">
+                    <?php echo sprintf(__('Track %s', 'carramba-woo-order-tracking'), esc_html($item['tracking_number'])); ?>
                 </a>
+                <?php endforeach; ?>
             </p>
         </div>
         <?php
@@ -164,8 +172,11 @@ class CWOT_Email {
         echo "\n" . strtoupper(__('Order Tracking Information', 'carramba-woo-order-tracking')) . "\n";
         echo str_repeat('=', 50) . "\n\n";
         
-        echo __('Shipping Company:', 'carramba-woo-order-tracking') . ' ' . $tracking_info['shipper_name'] . "\n";
-        echo __('Tracking Number:', 'carramba-woo-order-tracking') . ' ' . $tracking_info['tracking_number'] . "\n";
-        echo __('Track Your Package:', 'carramba-woo-order-tracking') . ' ' . $tracking_info['tracking_url'] . "\n\n";
+        echo __('Shipping Company:', 'carramba-woo-order-tracking') . ' ' . $tracking_info['shipper_name'] . "\n\n";
+        
+        foreach ($tracking_info['tracking_items'] as $item) {
+            echo __('Tracking Number:', 'carramba-woo-order-tracking') . ' ' . $item['tracking_number'] . "\n";
+            echo __('Track Your Package:', 'carramba-woo-order-tracking') . ' ' . $item['tracking_url'] . "\n\n";
+        }
     }
 }

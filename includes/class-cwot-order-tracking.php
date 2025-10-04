@@ -119,7 +119,27 @@ class CWOT_Order_Tracking {
         }
         
         $tracking_shipper_id = $this->get_order_meta($order_id, '_cwot_tracking_shipper_id', true);
-        $tracking_number = $this->get_order_meta($order_id, '_cwot_tracking_number', true);
+        $tracking_numbers = $this->get_order_meta($order_id, '_cwot_tracking_numbers', true);
+        
+        // Convert old single tracking number to array format
+        if (empty($tracking_numbers)) {
+            $old_tracking_number = $this->get_order_meta($order_id, '_cwot_tracking_number', true);
+            if (!empty($old_tracking_number)) {
+                $tracking_numbers = array($old_tracking_number);
+            } else {
+                $tracking_numbers = array('');
+            }
+        }
+        
+        if (!is_array($tracking_numbers)) {
+            $tracking_numbers = array($tracking_numbers);
+        }
+        
+        // Ensure at least one empty field
+        if (empty($tracking_numbers)) {
+            $tracking_numbers = array('');
+        }
+        
         $shippers = CWOT_Database::get_active_shippers();
         ?>
         <div class="cwot-tracking-meta-box">
@@ -135,23 +155,39 @@ class CWOT_Order_Tracking {
                 </select>
             </p>
             
-            <p class="form-field">
-                <label for="_cwot_tracking_number"><?php _e('Tracking Number:', 'carramba-woo-order-tracking'); ?></label>
-                <input type="text" id="_cwot_tracking_number" name="_cwot_tracking_number" value="<?php echo esc_attr($tracking_number); ?>" placeholder="<?php _e('Enter tracking number', 'carramba-woo-order-tracking'); ?>" style="width: 100%;" />
-            </p>
+            <div class="form-field cwot-tracking-numbers-container">
+                <label><?php _e('Tracking Numbers:', 'carramba-woo-order-tracking'); ?></label>
+                <div class="cwot-tracking-numbers-list">
+                    <?php foreach ($tracking_numbers as $index => $tracking_number): ?>
+                        <div class="cwot-tracking-number-row">
+                            <input type="text" name="_cwot_tracking_numbers[]" value="<?php echo esc_attr($tracking_number); ?>" placeholder="<?php _e('Enter tracking number', 'carramba-woo-order-tracking'); ?>" class="cwot-tracking-number-input" />
+                            <?php if ($index > 0): ?>
+                                <button type="button" class="button cwot-remove-tracking-number" title="<?php _e('Remove', 'carramba-woo-order-tracking'); ?>">×</button>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <button type="button" class="button cwot-add-tracking-number" style="margin-top: 10px;">
+                    <?php _e('+ Add Another Tracking Number', 'carramba-woo-order-tracking'); ?>
+                </button>
+            </div>
             
-            <?php if ($tracking_shipper_id && $tracking_number): ?>
+            <?php if ($tracking_shipper_id && !empty(array_filter($tracking_numbers))): ?>
                 <?php 
                 $shipper = CWOT_Database::get_shipper_by_id($tracking_shipper_id);
                 if ($shipper):
-                    $tracking_url = str_replace('{tracking_number}', urlencode($tracking_number), $shipper->tracking_url);
                 ?>
-                    <p class="form-field">
-                        <label><?php _e('Tracking Link:', 'carramba-woo-order-tracking'); ?></label>
-                        <a href="<?php echo esc_url($tracking_url); ?>" target="_blank" class="button button-secondary" style="width: 100%; text-align: center;">
-                            <?php _e('Track Package', 'carramba-woo-order-tracking'); ?>
-                        </a>
-                    </p>
+                    <div class="form-field cwot-tracking-links">
+                        <label><?php _e('Tracking Links:', 'carramba-woo-order-tracking'); ?></label>
+                        <?php foreach (array_filter($tracking_numbers) as $tracking_number): ?>
+                            <?php 
+                            $tracking_url = str_replace('{tracking_number}', urlencode($tracking_number), $shipper->tracking_url);
+                            ?>
+                            <a href="<?php echo esc_url($tracking_url); ?>" target="_blank" class="button button-secondary" style="width: 100%; text-align: center; margin-bottom: 5px;">
+                                <?php echo sprintf(__('Track %s', 'carramba-woo-order-tracking'), esc_html($tracking_number)); ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
                 <?php endif; ?>
             <?php endif; ?>
         </div>
@@ -200,12 +236,23 @@ class CWOT_Order_Tracking {
             }
         }
         
-        // Save tracking number
-        if (isset($_POST['_cwot_tracking_number'])) {
-            $tracking_number = sanitize_text_field($_POST['_cwot_tracking_number']);
-            if (!empty($tracking_number)) {
-                $this->update_order_meta($order_id, '_cwot_tracking_number', $tracking_number);
+        // Save tracking numbers (array)
+        if (isset($_POST['_cwot_tracking_numbers']) && is_array($_POST['_cwot_tracking_numbers'])) {
+            $tracking_numbers = array_map('sanitize_text_field', $_POST['_cwot_tracking_numbers']);
+            // Remove empty values
+            $tracking_numbers = array_filter($tracking_numbers, function($value) {
+                return !empty(trim($value));
+            });
+            
+            if (!empty($tracking_numbers)) {
+                // Re-index array to be sequential
+                $tracking_numbers = array_values($tracking_numbers);
+                $this->update_order_meta($order_id, '_cwot_tracking_numbers', $tracking_numbers);
+                
+                // Also save the first tracking number in the old field for backward compatibility
+                $this->update_order_meta($order_id, '_cwot_tracking_number', $tracking_numbers[0]);
             } else {
+                $this->delete_order_meta($order_id, '_cwot_tracking_numbers');
                 $this->delete_order_meta($order_id, '_cwot_tracking_number');
             }
         }
@@ -252,17 +299,33 @@ class CWOT_Order_Tracking {
      */
     private function render_tracking_column_content($order_id) {
         $tracking_shipper_id = $this->get_order_meta($order_id, '_cwot_tracking_shipper_id', true);
-        $tracking_number = $this->get_order_meta($order_id, '_cwot_tracking_number', true);
+        $tracking_numbers = $this->get_order_meta($order_id, '_cwot_tracking_numbers', true);
         
-        if ($tracking_shipper_id && $tracking_number) {
+        // Backward compatibility - check old single tracking number
+        if (empty($tracking_numbers)) {
+            $old_tracking_number = $this->get_order_meta($order_id, '_cwot_tracking_number', true);
+            if (!empty($old_tracking_number)) {
+                $tracking_numbers = array($old_tracking_number);
+            }
+        }
+        
+        if (!is_array($tracking_numbers)) {
+            $tracking_numbers = empty($tracking_numbers) ? array() : array($tracking_numbers);
+        }
+        
+        $tracking_numbers = array_filter($tracking_numbers);
+        
+        if ($tracking_shipper_id && !empty($tracking_numbers)) {
             $shipper = CWOT_Database::get_shipper_by_id($tracking_shipper_id);
             if ($shipper) {
-                $tracking_url = str_replace('{tracking_number}', urlencode($tracking_number), $shipper->tracking_url);
                 echo '<div class="cwot-tracking-info">';
                 echo '<strong>' . esc_html($shipper->name) . '</strong><br>';
-                echo '<a href="' . esc_url($tracking_url) . '" target="_blank" title="' . __('Track package', 'carramba-woo-order-tracking') . '">';
-                echo esc_html($tracking_number);
-                echo '</a>';
+                foreach ($tracking_numbers as $tracking_number) {
+                    $tracking_url = str_replace('{tracking_number}', urlencode($tracking_number), $shipper->tracking_url);
+                    echo '<a href="' . esc_url($tracking_url) . '" target="_blank" title="' . __('Track package', 'carramba-woo-order-tracking') . '">';
+                    echo esc_html($tracking_number);
+                    echo '</a><br>';
+                }
                 echo '</div>';
             } else {
                 echo '<span class="cwot-tracking-error">' . __('Invalid shipper', 'carramba-woo-order-tracking') . '</span>';
@@ -278,9 +341,23 @@ class CWOT_Order_Tracking {
     public static function get_order_tracking_info($order_id) {
         $instance = self::get_instance();
         $tracking_shipper_id = $instance->get_order_meta($order_id, '_cwot_tracking_shipper_id', true);
-        $tracking_number = $instance->get_order_meta($order_id, '_cwot_tracking_number', true);
+        $tracking_numbers = $instance->get_order_meta($order_id, '_cwot_tracking_numbers', true);
         
-        if (!$tracking_shipper_id || !$tracking_number) {
+        // Backward compatibility - check old single tracking number
+        if (empty($tracking_numbers)) {
+            $old_tracking_number = $instance->get_order_meta($order_id, '_cwot_tracking_number', true);
+            if (!empty($old_tracking_number)) {
+                $tracking_numbers = array($old_tracking_number);
+            }
+        }
+        
+        if (!is_array($tracking_numbers)) {
+            $tracking_numbers = empty($tracking_numbers) ? array() : array($tracking_numbers);
+        }
+        
+        $tracking_numbers = array_filter($tracking_numbers);
+        
+        if (!$tracking_shipper_id || empty($tracking_numbers)) {
             return false;
         }
         
@@ -289,11 +366,22 @@ class CWOT_Order_Tracking {
             return false;
         }
         
+        // Build tracking info array for each tracking number
+        $tracking_items = array();
+        foreach ($tracking_numbers as $tracking_number) {
+            $tracking_items[] = array(
+                'tracking_number' => $tracking_number,
+                'tracking_url' => str_replace('{tracking_number}', urlencode($tracking_number), $shipper->tracking_url)
+            );
+        }
+        
         return array(
             'shipper_id' => $tracking_shipper_id,
             'shipper_name' => $shipper->name,
-            'tracking_number' => $tracking_number,
-            'tracking_url' => str_replace('{tracking_number}', urlencode($tracking_number), $shipper->tracking_url)
+            'tracking_items' => $tracking_items,
+            // Keep for backward compatibility
+            'tracking_number' => $tracking_numbers[0],
+            'tracking_url' => str_replace('{tracking_number}', urlencode($tracking_numbers[0]), $shipper->tracking_url)
         );
     }
 }
