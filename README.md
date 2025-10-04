@@ -6,6 +6,7 @@ A comprehensive WooCommerce order tracking plugin that allows store administrato
 
 - **Shipper Management**: Add, edit, and manage shipping companies with custom tracking URL templates
 - **Order Integration**: Add tracking information directly to WooCommerce orders
+- **Multiple Tracking Numbers**: Support for orders split across multiple packages with the same shipper
 - **Customer Notifications**: Automatically include tracking information in customer completed order emails
 - **Order Tracking Display**: Show tracking information on customer account order details pages
 - **Admin Interface**: Easy-to-use admin interface integrated with WooCommerce
@@ -30,8 +31,11 @@ A comprehensive WooCommerce order tracking plugin that allows store administrato
 
 1. Edit any WooCommerce order in the admin
 2. In the Order Tracking section, select a shipper from the dropdown
-3. Enter the tracking number
-4. Save the order
+3. Enter the tracking number(s)
+4. Click **+ Add Another Tracking Number** to add multiple tracking numbers for the same order
+5. Save the order
+
+**Note**: All tracking numbers for a single order must use the same shipping company. If you need to use multiple shippers, you may need to split the order.
 
 ### Customer Experience
 
