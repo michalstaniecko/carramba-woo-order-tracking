@@ -57,6 +57,14 @@ When an order status is changed to "Completed":
 - WooCommerce 4.0 or higher  
 - PHP 7.4 or higher
 
+## Translations
+
+The plugin is translation-ready and includes:
+
+- **Norwegian Bokmål (nb_NO)** - Complete translation
+
+To contribute additional translations, please see the [languages/README.md](languages/README.md) file.
+
 ## Support
 
 For support and feature requests, please visit the [GitHub repository](https://github.com/michalstaniecko/carramba-woo-order-tracking).
