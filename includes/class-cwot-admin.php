@@ -108,7 +108,7 @@ class CWOT_Admin {
     private function save_shipper() {
         $shipper_data = array(
             'name' => sanitize_text_field($_POST['shipper_name']),
-            'tracking_url' => esc_url_raw($_POST['tracking_url']),
+            'tracking_url' => sanitize_text_field($_POST['tracking_url']),
             'status' => sanitize_text_field($_POST['status'])
         );
         
