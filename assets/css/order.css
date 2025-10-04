@@ -22,6 +22,51 @@
     display: inline-block;
 }
 
+/* Multiple tracking numbers */
+.cwot-tracking-numbers-container {
+    margin-bottom: 15px;
+}
+
+.cwot-tracking-numbers-container label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.cwot-tracking-number-row {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.cwot-tracking-number-input {
+    flex: 1;
+    width: 100% !important;
+}
+
+.cwot-remove-tracking-number {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    font-size: 20px;
+    line-height: 1;
+    color: #a00;
+    border-color: #a00;
+}
+
+.cwot-remove-tracking-number:hover {
+    background-color: #a00;
+    color: #fff;
+    border-color: #a00;
+}
+
+.cwot-tracking-links a {
+    display: block;
+    margin-bottom: 5px;
+}
+
 /* Frontend order details styles */
 .woocommerce-order-tracking {
     margin-top: 30px;
